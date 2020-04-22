@@ -45,21 +45,28 @@ let matchingCallback: IOHIDDeviceCallback = {context, result, sender, device in
     IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetCurrent(), CFRunLoopMode.commonModes.rawValue)
     let callback: IOHIDValueCallback = {context, result, sender, value in
         if let context = context {
+            print("Context")
             let isRight = context.load(as: Bool.self)
 
             let element = IOHIDValueGetElement(value)
             let cookie = IOHIDElementGetCookie(element)
-            if cookie != 1202 {
+            print(element)
+
+            if cookie != 1224 {
                 return
             }
             let code = IOHIDValueGetIntegerValue(value)
             print(cookie, code)
+            print(code)
 
             let event = CGEvent.init(source: nil)
             if let event = event {
+
                 if code < 0 || code > 7 {
                     return
                 }
+                print("Move")
+
                 let point = event.location
                 let distance: CGFloat = 10.0
                 let angle: CGFloat = CGFloat(code) * CGFloat.pi / 4 + (isRight ? CGFloat.pi : 0)
@@ -68,7 +75,7 @@ let matchingCallback: IOHIDDeviceCallback = {context, result, sender, device in
             }
         }
     }
-    let context = UnsafeMutableRawPointer.allocate(bytes: 1, alignedTo: 4)
+    let context = UnsafeMutableRawPointer.allocate(byteCount: 1, alignment: 4)
     context.storeBytes(of: name == rightName, as: Bool.self)
     IOHIDDeviceRegisterInputValueCallback(device, callback, context)
 }
